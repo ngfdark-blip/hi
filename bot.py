@@ -3,7 +3,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, CallbackQueryHandler, MessageHandler, filters
 
 # زانیاریێن بۆتی و ئەپی
-TOKEN = "8749648646:AAHQTiavunhsvndF1p45yR3tkYv339CkGYE"
+TOKEN = "8749648646:AAESokEBXui0n7Rqcarxf6DBD09XvmCBk3M"
 API_ID = 34584240
 API_HASH = "eba4f8333cba5f9697a1d20779d4d6e9"
 
