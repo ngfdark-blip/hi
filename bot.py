@@ -1,6 +1,6 @@
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, CallbackQueryHandler, MessageHandler, filters
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters
 
 TOKEN = "8749648646:AAESokEBXui0n7Rqcarxf6DBD09XvmCBk3M"
 OWNER_USERNAME = "YUSEEF_SURCHI"
@@ -10,7 +10,7 @@ logging.basicConfig(
     level=logging.INFO
 )
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def start(update: Update, context):
     user = update.effective_user
     welcome_message = "سلاڤ! بێخێر هاتێ بۆ بۆتا مە.\nئەڤە بۆتا خزمەتگوزاریێ یە."
     
@@ -26,7 +26,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(welcome_message, reply_markup=reply_markup, parse_mode="Markdown")
 
-async def profile_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def profile_callback(update: Update, context):
     query = update.callback_query
     await query.answer()
     user = query.from_user
@@ -39,12 +39,12 @@ async def profile_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     await query.message.reply_text(info, parse_mode="Markdown")
 
-async def delete_text_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def delete_text_callback(update: Update, context):
     query = update.callback_query
     await query.answer()
     await query.message.reply_text("📹 ڤیدیۆیا خۆ بفڕێکە (بینێرە)، دا کو ئەز تێکستێ سەر وێ ژێبرم و ڤیدیۆیەکا پاقژ بۆ تە ڤەگەرینم.")
 
-async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def handle_video(update: Update, context):
     try:
         video = update.message.video
         file_id = video.file_id
@@ -63,7 +63,7 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ ببورە، هەڵەیەک ڕووی دا د پرۆسێسکردنا ڤیدیۆیێ دا.")
 
 def main():
-    application = ApplicationBuilder().token(TOKEN).build()
+    application = Application.builder().token(TOKEN).build()
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(profile_callback, pattern="^btn_profile$"))
