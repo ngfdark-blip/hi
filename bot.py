@@ -1,6 +1,7 @@
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
+# تەنها تۆکنا بۆتی پێدڤییە و بس!
 TOKEN = "8749648646:AAESokEBXui0n7Rqcarxf6DBD09XvmCBk3M"
 OWNER_USERNAME = "YUSEEF_SURCHI"
 
