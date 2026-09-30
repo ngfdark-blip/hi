@@ -28,7 +28,6 @@ async def check_subscription(client, user_id):
 @app.on_message(filters.command("start"))
 async def start_command(client, message):
     user_id = message.from_user.id
-    
     is_joined = await check_subscription(client, user_id)
     
     if not is_joined:
@@ -45,7 +44,11 @@ async def start_command(client, message):
 
     await message.reply_text(
         f"👋 **سلاڤ برا! بۆتێ MX Downloader یێ ئامادەیە.**\n"
-        f"🔗 لینکا TikTok یان Instagram بۆ من بنێرە دا بێ ڤارترمارک بۆ تە داگرتم!"
+        f"🔗 لینکا **TikTok، Instagram یاخود YouTube** بۆ من بنێرە دا:\n"
+        f"• ڤیدیۆ بێ ڤارترمارک (720p)\n"
+        f"• وێنە / پۆست\n"
+        f"• دەنگ (MP3)\n"
+        f"بۆ تە داگرتم!"
     )
 
 @app.on_callback_query()
@@ -69,39 +72,72 @@ async def download_media(client, message):
 
     text = message.text.strip()
     if not text.startswith("http"):
-        await message.reply_text("❌ لینکه کێ دروست یێ TikTok یان Instagram بنێرە.")
+        await message.reply_text("❌ لینکه کێ دروست یێ TikTok، Instagram یان YouTube بنێرە.")
         return
 
-    processing_msg = await message.reply_text("🔄 **بۆت مژوولی داگرتنا ڤیدیۆیێ یە...**")
+    processing_msg = await message.reply_text("🔄 **بۆت مژوولی داگرتنا ناڤەرۆکێ یە (ڤیدیۆ، وێنە یان MP3)...**")
 
     try:
-        ydl_opts = {
-            'format': 'best[height<=720]',
+        os.makedirs("downloads", exist_ok=True)
+        
+        # 1. داگرتنا MP3
+        ydl_opts_audio = {
+            'format': 'bestaudio/best',
+            'outtmpl': f'downloads/{user_id}_%(id)s.%(ext)s',
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '192',
+            }],
+            'no_warnings': True,
+        }
+
+        # 2. داگرتنا ڤیدیۆیێ (ب کوالیتیا 720p)
+        ydl_opts_video = {
+            'format': 'best[height<=720]/best',
             'outtmpl': f'downloads/{user_id}_%(id)s.%(ext)s',
             'no_warnings': True,
         }
-        
-        os.makedirs("downloads", exist_ok=True)
-        
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+
+        # پشکنین و داگرتن ب ڕێکا yt-dlp
+        with yt_dlp.YoutubeDL(ydl_opts_video) as ydl:
             info = ydl.extract_info(text, download=True)
             filename = ydl.prepare_filename(info)
-            
-            title = info.get('title', 'بێ ناڤ')
+            title = info.get('title', 'MX Downloader Media')
             uploader = info.get('uploader', 'نەدیار')
-
-            caption = f"🎬 **ڤیدیۆیا تە هاتە داگرتن (720p)**\n\n📝 **ناڤەرۆک:** {title}\n👤 **کەڤنار:** {uploader}"
-
-            await client.send_video(chat_id=message.chat.id, video=filename, caption=caption)
             
+            # ئەگەر فایلا ڤیدیۆیێ بوو (یان وێنە بوو)
             if os.path.exists(filename):
-                os.remove(filename)
+                caption = f"🎬 **ناڤەرۆکا هاتە داگرتن**\n\n📝 **ناڤ:** {title}\n👤 **کەڤنار:** {uploader}\n🚀 *@MX_VIDEO_DOWNLOAD*"
                 
-            await processing_msg.delete()
+                # ئەگەر وێنە بیت
+                if filename.endswith(('.jpg', '.jpeg', '.png', '.webp')):
+                    await client.send_photo(chat_id=message.chat.id, photo=filename, caption=caption)
+                else:
+                    await client.send_video(chat_id=message.chat.id, video=filename, caption=caption, supports_streaming=True)
+                
+                if os.path.exists(filename):
+                    os.remove(filename)
+
+        # داگرتن و هنارتنا دەنگی (MP3) ژی ب هەڤڕا
+        with yt_dlp.YoutubeDL(ydl_opts_audio) as ydl_audio:
+            info_audio = ydl_audio.extract_info(text, download=True)
+            base_filename = ydl_audio.prepare_filename(info_audio)
+            mp3_filename = os.path.splitext(base_filename)[0] + ".mp3"
+            
+            if os.path.exists(mp3_filename):
+                await client.send_audio(
+                    chat_id=message.chat.id, 
+                    audio=mp3_filename, 
+                    caption=f"🎵 **دەنگێ MP3**\n🚀 *@MX_VIDEO_DOWNLOAD*"
+                )
+                if os.path.exists(mp3_filename):
+                    os.remove(mp3_filename)
+
+        await processing_msg.delete()
 
     except Exception as e:
-        await processing_msg.edit_text(f"❌ چەوتیەک چێبوو:\n`{str(e)}`")
+        await processing_msg.edit_text(f"❌ چەوتیەک لەوما چێبوو:\n`{str(e)}`")
 
 if __name__ == "__main__":
-    print("Bot is running...")
     app.run()
