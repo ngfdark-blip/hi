@@ -28,10 +28,8 @@ global_total_downloads = 0
 banned_users = set()
 secret_code_usage_count = {}
 
-# Admin temporary state memory for modifying balance or managing users
 admin_temp_state = {}
 
-# 200 Distinct Active Codes: Starting with MX-LEGEND-, exactly 25 chars long, 500M balance each, max 20 users per code
 MX_200_500M_CODES = {}
 predefined_codes = [
     "MX-LEGEND-A1B2C3D4E5F6G7H", "MX-LEGEND-Z9Y8X7W6V5U4T3S", "MX-LEGEND-M1N2B3V4C5X6Z7A", "MX-LEGEND-P9O8I7U6Y5T4R3E",
@@ -90,7 +88,7 @@ for code in MX_200_500M_CODES:
     secret_code_usage_count[code] = set()
 
 def get_baghdad_time():
-    t_sec = time.time() + 10800  # UTC+3 Baghdad Time
+    t_sec = time.time() + 10800
     return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(t_sec))
 
 def get_main_menu_keyboard(user_id):
@@ -416,7 +414,7 @@ async def admin_bal_sub_handler(client, callback_query: CallbackQuery):
     admin_temp_state[ADMIN_ID] = {"action": "sub_bal", "target_uid": uid}
     await callback_query.message.edit_text(
         f"➖ **کێمکرنا Balance ژ User ID: `{uid}`**\n\n"
-        f"هژمارا کییا بنێرە یا تە دڤێت کێم بکەی (بۆ نموونە: `100`):y\n\n"
+        f"هژمارا کییا بنێرە یا تە دڤێت کێم بکەی (بۆ نموونە: `100`):\n\n"
         f"⏰ وقت بغداد: `{get_baghdad_time()}`",
         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 پەشیمانبوون", callback_data=f"admin_view_user|{uid}")]])
     )
@@ -431,7 +429,7 @@ async def admin_gift_all_handler(client, callback_query: CallbackQuery):
     admin_temp_state[ADMIN_ID] = {"action": "gift_bal", "target_uid": uid}
     await callback_query.message.edit_text(
         f"🎁 **Gift All Balance (دیاری کرن بۆ User ID: `{uid}`)**\n\n"
-        f"هژمارا کییا گشتی بنێرە یا تە دڤێت بکەییە دیاری (بۆ نموونە: `500000000`):y\n\n"
+        f"هژمارا کییا گشتی بنێرە یا تە دڤێت بکەییە دیاری (بۆ نموونە: `500000000`):\n\n"
         f"⏰ وقت بغداد: `{get_baghdad_time()}`",
         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 پەشیمانبوون", callback_data=f"admin_view_user|{uid}")]])
     )
@@ -462,7 +460,6 @@ async def downloader_core_handler(client, message: Message):
 
     text_input = message.text.strip()
 
-    # Handle Admin input states (Balance modifications)
     if user_id == ADMIN_ID and user_id in admin_temp_state:
         state_data = admin_temp_state[ADMIN_ID]
         target_uid = state_data["target_uid"]
@@ -620,7 +617,7 @@ async def download_callback_handler(client, callback_query: CallbackQuery):
         else:
             ydl_opts = {
                 'format': 'bestaudio/best', 'outtmpl': 'downloads/%(id)s.%(ext)s', 'quiet': True,
-                'extractor_args': {'youtube': {'player_client': ['android', 'web']}}
+                'extractor_args': {'youtube': {'player_client': ['android, web']}}
             }
             with YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(url_link, download=True)
