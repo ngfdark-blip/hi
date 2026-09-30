@@ -21,7 +21,6 @@ app = Client(
 
 user_data = {}
 
-# دروستکرنا IPـیا خەیاڵی و سەلامەت بۆ پروفایلی
 def generate_fake_ip(user_id):
     random.seed(user_id)
     return f"192.168.{random.randint(10, 250)}.{random.randint(2, 240)}"
