@@ -7,12 +7,9 @@ API_ID = 34584240
 API_HASH = "eba4f8333cba5f9697a1d20779d4d6e9"
 BOT_TOKEN = "8918686553:AAGn658Ptv0-ThnFWrLpZqh6q-dHY5Hy-y4"
 
-# هەردوو Owner (Admin) ب تەمامی هاتنە جهگیرکرن
 ADMINS = [7904656691, 7643191802]  
 CHANNEL_USERNAME = "MX_VIDEO_DOWNLOAD"
 BOT_USERNAME = "MX_Download_Bot" 
-
-# لینکێ وێنەیێ logo.png ل GitHub (لێرە لینکێ راستی یێ فایلی ل GitHub بنویسە)
 LOGO_URL = "https://raw.githubusercontent.com/ngfdark-blip/hi/main/logo.png"
 
 app = Client("MX_Download_Bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
@@ -139,7 +136,6 @@ async def start_command(client, message):
         await message.reply_text("⛔ بۆت لە ئێستادا ڕگیراوە (Maintenance Mode). تکایە دواتر هەوڵ بدەرەوە.")
         return
 
-    # پشکنینا بانیا دەمکی (Temporary Ban Check)
     if user_id in users_data and users_data[user_id].get("ban_until", 0) > time.time():
         rem_time = int(users_data[user_id]["ban_until"] - time.time())
         await message.reply_text(f"❌ تو لە لایەن ڕێڤەبەری ڤە بێبەش کرایە! ماوەی ماوە: `{rem_time}` چرکە.")
@@ -233,13 +229,13 @@ async def callback_handler(client, query):
         media_type = data.split("_")[1]
         if media_type == "mp4":
             await query.answer("🎬 Downloading MP4...", show_alert=True)
-            await message.reply_video(
+            await query.message.reply_video(
                 video="https://www.w3schools.com/html/mov_bbb.mp4",
                 caption="✅ **MX DOWNLOAD**: Here is your video in **MP4** format!"
             )
         elif media_type == "mp3":
             await query.answer("🎵 Downloading MP3...", show_alert=True)
-            await message.reply_audio(
+            await query.message.reply_audio(
                 audio="https://www.w3schools.com/html/horse.mp3",
                 caption="✅ **MX DOWNLOAD**: Here is your audio in **MP3** format!"
             )
@@ -313,7 +309,6 @@ async def download_media(client, message):
             [InlineKeyboardButton(t["download_mp4"], callback_data="dl_mp4"), InlineKeyboardButton(t["download_mp3"], callback_data="dl_mp3")],
             [InlineKeyboardButton(t["back_btn"], callback_data="back_main")]
         ])
-        # بەکارئینانا وێنەیێ Logo.png لە GitHub
         await message.reply_photo(
             photo=LOGO_URL,
             caption="📥 **MX DOWNLOAD**: Media received successfully! Choose your format:",
