@@ -5,12 +5,17 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 API_ID = 34584240
 API_HASH = "eba4f8333cba5f9697a1d20779d4d6e9"
 BOT_TOKEN = "8918686553:AAGn658Ptv0-ThnFWrLpZqh6q-dHY5Hy-y4"
+
+# Hardok owner (admin) ID yen te لێرە
 ADMINS = [int(admin_id) for admin_id in os.getenv("ADMINS", "123456789,987654321").split(",")]
 CHANNEL_USERNAME = "MX_VIDEO_DOWNLOAD"
 
 app = Client("MX_Download_Bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
 async def check_subscription(client, user_id):
+    # Eger bikarhêner owner/admin be, pêdivî nake join bike (hardok owner tên îستیثنا کرن)
+    if user_id in ADMINS:
+        return True
     try:
         member = await client.get_chat_member(CHANNEL_USERNAME, user_id)
         if member.status in ["creator", "administrator", "member"]:
@@ -19,7 +24,7 @@ async def check_subscription(client, user_id):
         return False
     return False
 
-# 4 zabanon ke liye texts
+# Zimanê Badini u zimanen din
 TEXTS = {
     "badini": {
         "welcome": "✨ بەخێر هاتیت بەرێز بۆ بۆتی **MX DOWNLOAD**!\n\n📥 لينكێ ڤیدیۆیا TikTok، Instagram یان YouTube بنێرە دا بێ وێنەی ئاو (No Watermark) بۆ دابەزینم.",
@@ -56,6 +61,8 @@ user_languages = {}
 @app.on_message(filters.command("start"))
 async def start_command(client, message):
     user_id = message.from_user.id
+    
+    # Dema /start tê ل دەستپێکێ زمانê Badini دیار دکە
     lang = user_languages.get(user_id, "badini")
     t = TEXTS[lang]
 
@@ -91,7 +98,6 @@ async def callback_handler(client, query):
         new_t = TEXTS[new_lang]
         await query.answer(new_t["lang_changed"], show_alert=True)
         
-        # Updated buttons for language change
         keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton("Badînî 🇹🇯", callback_data="set_badini"), InlineKeyboardButton("Soranî 🇹🇯", callback_data="set_sorani")],
             [InlineKeyboardButton("العربية 🇸🇦", callback_data="set_ar"), InlineKeyboardButton("English 🇬🇧", callback_data="set_en")],
