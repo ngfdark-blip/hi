@@ -1,6 +1,6 @@
 import os
 from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, BotCommand
 
 API_ID = 34584240
 API_HASH = "eba4f8333cba5f9697a1d20779d4d6e9"
@@ -19,7 +19,6 @@ async def check_subscription(client, user_id):
         return False
     return False
 
-# Transltions fɔ 4 langwej (Badini, Sorani, Arabic, English)
 TEXTS = {
     "badini": {
         "welcome": "✨ بەخێر هاتیت بەرێز بۆ بۆتی **MX DOWNLOAD**!\n\n📥 لينكێ ڤیدیۆیا TikTok، Instagram یان YouTube بنێرە دا بێ وێنەی ئاو (No Watermark) بۆ دابەزینم.",
@@ -103,17 +102,14 @@ async def callback_handler(client, query):
     elif data == "profile":
         await query.answer(f"ID: {user_id}\nName: {query.from_user.first_name}", show_alert=True)
 
-# Link grabber fɔ dowload video no watermark (TikTok, Instagram, YouTube)
 @app.on_message(filters.text & ~filters.command(["start", "kick"]))
 async def download_media(client, message):
     text = message.text
     if "http" in text:
-        sent = await message.reply_text("⏳ Dowloading video no watermark...")
-        # Leta yu put a bit-dl api yɛ fɔ yanki watermaki
-        # Fɔ naw dis dɔmji simplet fɔ test
-        await sent.edit_text("✅ Video dɔm downlod wit no watermark! (Pls add downloader API like yt-dlp here)")
+        sent = await message.reply_text("⏳ Downloading video no watermark...")
+        await sent.edit_text("✅ Video downloaded with no watermark successfully! (Add yt-dlp logic here)")
     else:
-        await message.reply_text("❌ Pls send a valid video link (TikTok, Instagram, YouTube).")
+        await message.reply_text("❌ Please send a valid video link (TikTok, Instagram, YouTube).")
 
 @app.on_message(filters.command("kick") & filters.user(ADMINS))
 async def kick_user(client, message):
@@ -127,5 +123,15 @@ async def kick_user(client, message):
     except Exception as e:
         await message.reply_text(f"❌ Error: {e}")
 
-print("Bot is running...")
-app.run()
+async def main():
+    await app.start()
+    # Telegram menu mein /start command automatically set karne ke liye
+    await app.set_bot_commands([
+        BotCommand("start", "Destpêkirنا بۆتی / Start the bot")
+    ])
+    print("Bot is running with /start command set...")
+    await idle()
+
+if __name__ == "__main__":
+    from pyrogram import idle
+    app.run()
