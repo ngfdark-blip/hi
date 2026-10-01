@@ -1,10 +1,9 @@
 import os
 from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, BotCommand
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 API_ID = 34584240
 API_HASH = "eba4f8333cba5f9697a1d20779d4d6e9"
-# تووکنێ تە یێ فەرمی لێرە هاتیە جێگیرکرن
 BOT_TOKEN = "8918686553:AAGn658Ptv0-ThnFWrLpZqh6q-dHY5Hy-y4"
 ADMINS = [int(admin_id) for admin_id in os.getenv("ADMINS", "123456789,987654321").split(",")]
 CHANNEL_USERNAME = "MX_VIDEO_DOWNLOAD"
@@ -20,6 +19,7 @@ async def check_subscription(client, user_id):
         return False
     return False
 
+# 4 zabanon ke liye texts
 TEXTS = {
     "badini": {
         "welcome": "✨ بەخێر هاتیت بەرێز بۆ بۆتی **MX DOWNLOAD**!\n\n📥 لينكێ ڤیدیۆیا TikTok، Instagram یان YouTube بنێرە دا بێ وێنەی ئاو (No Watermark) بۆ دابەزینم.",
@@ -56,11 +56,10 @@ user_languages = {}
 @app.on_message(filters.command("start"))
 async def start_command(client, message):
     user_id = message.from_user.id
-    is_joined = await check_subscription(client, user_id)
-    
     lang = user_languages.get(user_id, "badini")
     t = TEXTS[lang]
 
+    is_joined = await check_subscription(client, user_id)
     if not is_joined:
         keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton(t["btn_join"], url=f"https://t.me/{CHANNEL_USERNAME}")],
@@ -83,28 +82,45 @@ async def start_command(client, message):
 async def callback_handler(client, query):
     user_id = query.from_user.id
     data = query.data
+    lang = user_languages.get(user_id, "badini")
+    t = TEXTS[lang]
 
     if data.startswith("set_"):
-        lang = data.split("_")[1]
-        user_languages[user_id] = lang
-        t = TEXTS[lang]
-        await query.answer(t["lang_changed"], show_alert=True)
-        await query.message.edit_text(t["welcome"], reply_markup=InlineKeyboardMarkup([
+        new_lang = data.split("_")[1]
+        user_languages[user_id] = new_lang
+        new_t = TEXTS[new_lang]
+        await query.answer(new_t["lang_changed"], show_alert=True)
+        
+        # Updated buttons for language change
+        keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton("Badînî 🇹🇯", callback_data="set_badini"), InlineKeyboardButton("Soranî 🇹🇯", callback_data="set_sorani")],
             [InlineKeyboardButton("العربية 🇸🇦", callback_data="set_ar"), InlineKeyboardButton("English 🇬🇧", callback_data="set_en")],
             [InlineKeyboardButton("👤 Profile", callback_data="profile")]
-        ]))
+        ])
+        if user_id in ADMINS:
+            keyboard.inline_keyboard.append([InlineKeyboardButton("⚙️ Admin Panel", callback_data="admin_panel")])
+            
+        await query.message.edit_text(new_t["welcome"], reply_markup=keyboard)
+        
     elif data == "check_sub":
         if await check_subscription(client, user_id):
-            await query.answer("✅ Thank you for joining!", show_alert=True)
+            await query.answer("✅ Spاس بو بەشداربوونا تە!", show_alert=True)
             await start_command(client, query.message)
         else:
-            await query.answer("❌ You have not joined the channel yet!", show_alert=True)
+            await query.answer("❌ Te hê ژ کەناڵێ باوڕ نەکرییە / You haven't joined yet!", show_alert=True)
+            
     elif data == "profile":
         await query.answer(f"ID: {user_id}\nName: {query.from_user.first_name}", show_alert=True)
 
 @app.on_message(filters.text & ~filters.command(["start", "kick"]))
 async def download_media(client, message):
+    user_id = message.from_user.id
+    if not await check_subscription(client, user_id):
+        lang = user_languages.get(user_id, "badini")
+        t = TEXTS[lang]
+        await message.reply_text(f"{t['join_req']}\n👉 @{CHANNEL_USERNAME}")
+        return
+        
     text = message.text
     if "http" in text:
         sent = await message.reply_text("⏳ Downloading video no watermark...")
@@ -112,17 +128,5 @@ async def download_media(client, message):
     else:
         await message.reply_text("❌ Please send a valid video link (TikTok, Instagram, YouTube).")
 
-@app.on_message(filters.command("kick") & filters.user(ADMINS))
-async def kick_user(client, message):
-    if not message.reply_to_message:
-        await message.reply_text("⚠️ Reply to user message to kick.")
-        return
-    target_id = message.reply_to_message.from_user.id
-    try:
-        await client.ban_chat_member(message.chat.id, target_id)
-        await message.reply_text("✅ User kicked successfully!")
-    except Exception as e:
-        await message.reply_text(f"❌ Error: {e}")
-
-if __name__ == "__main__":
-    app.run()
+print("Bot is running...")
+app.run()
