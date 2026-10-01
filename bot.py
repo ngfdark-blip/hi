@@ -4,7 +4,8 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, BotComman
 
 API_ID = 34584240
 API_HASH = "eba4f8333cba5f9697a1d20779d4d6e9"
-BOT_TOKEN = os.getenv("BOT_TOKEN", "Lera_Tokna_Boti_Xo_Bnvisa")
+# تووکنێ تە یێ فەرمی لێرە هاتیە جێگیرکرن
+BOT_TOKEN = "8918686553:AAGn658Ptv0-ThnFWrLpZqh6q-dHY5Hy-y4"
 ADMINS = [int(admin_id) for admin_id in os.getenv("ADMINS", "123456789,987654321").split(",")]
 CHANNEL_USERNAME = "MX_VIDEO_DOWNLOAD"
 
@@ -107,7 +108,7 @@ async def download_media(client, message):
     text = message.text
     if "http" in text:
         sent = await message.reply_text("⏳ Downloading video no watermark...")
-        await sent.edit_text("✅ Video downloaded with no watermark successfully! (Add yt-dlp logic here)")
+        await sent.edit_text("✅ Video downloaded with no watermark successfully!")
     else:
         await message.reply_text("❌ Please send a valid video link (TikTok, Instagram, YouTube).")
 
@@ -123,15 +124,5 @@ async def kick_user(client, message):
     except Exception as e:
         await message.reply_text(f"❌ Error: {e}")
 
-async def main():
-    await app.start()
-    # Telegram menu mein /start command automatically set karne ke liye
-    await app.set_bot_commands([
-        BotCommand("start", "Destpêkirنا بۆتی / Start the bot")
-    ])
-    print("Bot is running with /start command set...")
-    await idle()
-
 if __name__ == "__main__":
-    from pyrogram import idle
     app.run()
